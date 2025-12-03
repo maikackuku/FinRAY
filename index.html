@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>RAY FINANCE</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:#121a2b; --line:#1f2a44; --ink:#e8f0ff;
+      --muted:#8aa0b6; --accent:#5ac8fa; --field:#0e1626; --fieldline:#273356;
+      --ok:#41d37e; --err:#ff6b6b; --warn:#ffd166;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      background:var(--bg);
+      color:var(--ink);
+      font-family:system-ui,Segoe UI,Roboto,Arial;
+      margin:0;
+      width:100%;
+      overflow-x:hidden;
+    }
+    header{
+      padding:10px 16px;
+      border-bottom:1px solid var(--line);
+      position:sticky;
+      top:0;
+      background:var(--bg);
+      z-index:5
+    }
+    header h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.5px
+    }
+
+    .container{
+      max-width:640px;
+      margin:10px auto;
+      padding:0 10px;
+      width:100%;
+    }
+    .card{
+      background:var(--card);
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      width:100%;
+    }
+
+    label{
+      display:block;
+      margin-top:6px;
+      color:var(--muted);
+      font-size:13px
+    }
+    input,select,textarea{
+      width:100%;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--fieldline);
+      background:var(--field);
+      color:var(--ink);
+      font-size:14px;
+      font-family:inherit;
+    }
+    textarea{
+      resize:vertical;
+      min-height:54px;
+    }
+
+    input[type="file"]{
+      padding:6px 8px;
+      font-size:13px;
+    }
+
+    .actions{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:space-between;
+    }
+    .action-left{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    button{
+      border:0;
+      border-radius:10px;
+      padding:9px 13px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:14px
+    }
+    .primary{
+      background:var(--accent);
+      color:#001122;
+      min-width:120px
+    }
+    .ghost{
+      background:var(--field);
+      color:#c6d5ee;
+      border:1px solid var(--fieldline)
+    }
+
+    #status{
+      font-size:12px;
+      margin-top:2px;
+    }
+    .s-sending{color:var(--warn)}
+    .s-ok{color:var(--ok)}
+    .s-err{color:var(--err)}
+
+    .sheet-note-inline{
+      margin-left:auto;
+      font-size:12px;
+      color:var(--accent);
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .sheet-note-inline:hover{
+      text-decoration:underline;
+    }
+
+    .toast{
+      position:fixed;
+      inset:auto 16px 16px auto;
+      min-width:220px;
+      background:#0f1a2c;
+      border:1px solid var(--line);
+      color:var(--ink);
+      padding:8px 10px;
+      border-radius:10px;
+      box-shadow:0 8px 24px rgba(0,0,0,.35);
+      opacity:0;
+      transform:translateY(8px);
+      transition:opacity .2s, transform .2s;
+      z-index:9999
+    }
+    .toast.show{opacity:1;transform:translateY(0)}
+    .toast.ok{border-color:#1d734d}
+    .toast.err{border-color:#7a2b2b}
+
+    /* toggle Jenis Transaksi */
+    .toggle-group{
+      display:flex;
+      gap:8px;
+      margin-top:6px;
+    }
+
+    .toggle-btn{
+      flex:1;
+      border:1px solid var(--fieldline);
+      background: var(--field);
+      color:#ffffff;
+      padding:9px 0;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:600;
+      text-align:center;
+      transition: all .15s ease;
+    }
+
+    .toggle-btn.active{
+      background: var(--accent);
+      border-color: var(--accent);
+      color:#ffffff;
+    }
+
+    @media (max-width: 820px){
+      html, body{
+        width:100%;
+        overflow-x:hidden;
+        -webkit-text-size-adjust:100%;
+        text-size-adjust:100%;
+      }
+      .container{
+        max-width:100%;
+        margin:6px auto;
+        padding:8px 10px;
+      }
+      .card{
+        padding:10px 12px;
+        min-width:0;
+      }
+      header h1{ font-size:16px }
+      input,select,textarea{ padding:8px 10px; font-size:15px }
+      button{ padding:9px 14px; font-size:15px }
+      .sheet-note-inline{
+        width:100%;
+        text-align:right;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RAY FINANCE</h1>
+  </header>
+
+  <div class="container">
+    <!-- FORM -->
+    <section class="card">
+      <form id="txForm" autocomplete="off">
+        <label>Tanggal & Jam</label>
+        <input id="datetime" type="datetime-local" required />
+
+        <label>Nominal (Rp)</label>
+        <input id="amount" type="text" inputmode="numeric" placeholder="Rp0" required />
+
+        <label>Biaya Admin (Rp)</label>
+        <input id="adminFee" type="text" inputmode="numeric" placeholder="Rp0" />
+
+        <label>Jenis Transaksi</label>
+        <div class="toggle-group" id="txKindToggle">
+          <button type="button" class="toggle-btn active" data-kind="Pengeluaran">Pengeluaran</button>
+          <button type="button" class="toggle-btn" data-kind="Pendapatan">Pendapatan</button>
+        </div>
+        <input type="hidden" id="txKind" value="Pengeluaran" />
+
+        <label for="debitAccount">Debit</label>
+        <select id="debitAccount" required></select>
+
+        <label for="creditAccount">Kredit</label>
+        <select id="creditAccount" required></select>
+
+        <label for="notes">Catatan</label>
+        <textarea id="notes" placeholder="Opsional"></textarea>
+
+        <label for="notaFile">Foto Nota (opsional)</label>
+        <input id="notaFile" type="file" accept="image/*" />
+
+        <div class="actions">
+          <div class="action-left">
+            <button type="submit" class="primary" id="saveBtn">Simpan</button>
+            <button type="reset" class="ghost" id="resetBtn">Reset</button>
+            <span id="status" aria-live="polite"></span>
+          </div>
+          <a
+            href="https://docs.google.com/spreadsheets/d/1QVtwwTYd-yda4TtHjIP-W0AZvFR8B9fSH3f4pmF83V8/edit#gid=1816071844"
+            target="_blank"
+            rel="noopener"
+            class="sheet-note-inline"
+          >
+            Buka Google Sheet transaksi
+          </a>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // ================== KONFIG FRONTEND ==================
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx2aACJ5tushJQCTumbPnZ9MEQbSDVtREXuZLiYL7ziPUnVB_rr5xOaJPUv5HGcbzM/exec';
+  const API_TOKEN   = 'R4Y_FIN_SECRET_0880'; // samakan dengan di Apps Script
+
+  // UTIL
+  const $  = s => document.querySelector(s);
+  const fmt = n => new Intl.NumberFormat('id-ID',{
+    style:'currency',currency:'IDR'
+  }).format(n||0);
+
+  function setStatus(text, cls){
+    const el = $('#status');
+    el.className = '';
+    if (cls) el.classList.add(cls);
+    el.textContent = text || '';
+  }
+  function toast(msg, type){
+    const t = $('#toast');
+    t.className = 'toast ' + (type || '');
+    t.textContent = msg;
+    requestAnimationFrame(()=> t.classList.add('show'));
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(()=> t.classList.remove('show'), 2200);
+  }
+
+  // PARSE & FORMAT RUPIAH
+  function parseRupiah(raw) {
+    let v = String(raw || '').trim();
+    if (!v) return 0;
+    v = v.replace(/rp/gi, '').trim();
+    v = v.replace(/[^\d]/g, '');
+    const n = Number(v);
+    return isFinite(n) && !isNaN(n) ? n : 0;
+  }
+
+  function attachRpFormatter(selector){
+    const el = document.querySelector(selector);
+    if (!el) return;
+    const format = () => {
+      let digits = el.value.replace(/[^\d]/g, '');
+      if (!digits){
+        el.value = '';
+        return;
+      }
+      const num = Number(digits);
+      el.value = 'Rp' + new Intl.NumberFormat('id-ID').format(num);
+    };
+    el.addEventListener('input', format);
+    el.addEventListener('blur', format);
+  }
+
+  // DEFAULT DATETIME SEKARANG
+  (function setNow(){
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const iso = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    $('#datetime').value = iso;
+  })();
+
+  attachRpFormatter('#amount');
+  attachRpFormatter('#adminFee');
+
+  // toggle Pengeluaran / Pendapatan
+  (function initToggle(){
+    const hidden = $('#txKind');
+    const buttons = document.querySelectorAll('#txKindToggle .toggle-btn');
+    buttons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        buttons.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        hidden.value = btn.dataset.kind || 'Pengeluaran';
+      });
+    });
+  })();
+
+  // baca file nota dan konversi ke base64
+  function getNotaPayload(){
+    return new Promise((resolve) => {
+      const input = document.getElementById('notaFile');
+      const file = input.files && input.files[0];
+      if (!file){
+        resolve({});
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        const base64 = result.includes(',')
+          ? result.split(',')[1]
+          : result;
+        resolve({
+          notaFileName: file.name,
+          notaFileContent: base64,
+          notaMimeType: file.type || 'image/jpeg'
+        });
+      };
+      reader.onerror = () => {
+        console.error('Gagal baca file nota');
+        resolve({});
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // LOAD DATA AWAL via fetch → /exec?action=init
+  async function loadData(){
+    setStatus('Memuat akun…', 's-sending');
+    try {
+      const url = WEB_APP_URL + '?action=init&token=' + encodeURIComponent(API_TOKEN);
+      const res = await fetch(url, { method:'GET' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      if (!data || !data.ok) {
+        setStatus('Gagal memuat data', 's-err');
+        toast('Gagal memuat data', 'err');
+        console.error(data && data.error);
+        return;
+      }
+
+      const debitSel  = document.getElementById('debitAccount');
+      const creditSel = document.getElementById('creditAccount');
+
+      function fillSelect(sel, arr){
+        sel.innerHTML = '<option value="">— Pilih akun —</option>';
+        (arr || []).forEach(n=>{
+          const o = document.createElement('option');
+          o.value = o.textContent = n;
+          sel.appendChild(o);
+        });
+      }
+
+      fillSelect(debitSel,  data.debit  || []);
+      fillSelect(creditSel, data.credit || []);
+
+      setStatus('Siap ', 's-ok');
+    } catch(err){
+      console.error('Gagal load data', err);
+      setStatus('Gagal memuat data', 's-err');
+      toast('Gagal memuat data', 'err');
+    }
+  }
+
+  // SUBMIT → POST JSON ke /exec?action=save
+  document.getElementById('txForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#saveBtn');
+    btn.disabled = true;
+    setStatus('Mengirim…', 's-sending');
+
+    const amountRaw = $('#amount').value;
+    const adminRaw  = $('#adminFee').value;
+    const notaPayload = await getNotaPayload();
+
+    const payload = {
+      datetime: $('#datetime').value.replace('T',' '),
+      amount: parseRupiah(amountRaw),
+      currency: 'IDR',
+      fx: 1,
+      debitAccount:   $('#debitAccount').value,
+      creditAccount:  $('#creditAccount').value,
+      adminFee: parseRupiah(adminRaw),
+      tx_kind: $('#txKind').value,
+      notes: $('#notes').value,
+      ...notaPayload
+    };
+
+    try{
+      const url = WEB_APP_URL + '?action=save&token=' + encodeURIComponent(API_TOKEN);
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      if (!data || !data.ok) {
+        setStatus(`Gagal : ${data && data.error ? data.error : 'UNKNOWN'}`, 's-err');
+        toast('Gagal menyimpan transaksi', 'err');
+        btn.disabled = false;
+        return;
+      }
+
+      setStatus('Tersimpan ', 's-ok');
+      toast('Transaksi tersimpan', 'ok');
+      e.target.reset();
+      $('#txKind').value = 'Pengeluaran';
+      document.querySelectorAll('#txKindToggle .toggle-btn').forEach(btn=>{
+        btn.classList.toggle('active', btn.dataset.kind === 'Pengeluaran');
+      });
+
+      (function setNowAgain(){
+        const now=new Date(), pad=n=>String(n).padStart(2,'0');
+        $('#datetime').value =
+          `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      })();
+
+      btn.disabled = false;
+    } catch(err){
+      console.error('Error koneksi', err);
+      setStatus('Gagal : error koneksi', 's-err');
+      toast('Error koneksi', 'err');
+      btn.disabled = false;
+    }
+  });
+
+  // RESET
+  document.getElementById('txForm').addEventListener('reset', ()=>{
+    setTimeout(()=> setStatus('Form direset', 's-sending'), 0);
+  });
+
+  // GO
+  loadData();
+</script>
+</body>
+</html>
